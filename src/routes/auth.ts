@@ -97,4 +97,4 @@ export const verifyToken = (
   res.sendStatus(401);
 };
 
-export { router as userRouter };
+export { router as authRouter };
