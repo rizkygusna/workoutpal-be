@@ -72,7 +72,8 @@ router.post("/login", async (req, res) => {
     if (!isPasswordValid) return res.json({ message: "Password incorrect!" });
     // create token for the user
     const token = jwt.sign({ id: user.email }, JWT_SECRET);
-    res.json({ token, user: user });
+    const userObject = { email: user.email, fullName: user.full_name };
+    res.json({ token, user: userObject });
   } catch (error) {
     console.log(error);
     return res.status(500).json("Error when logging in.");
