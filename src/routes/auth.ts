@@ -80,6 +80,20 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.get("/user", async (req, res) => {
+  const { email } = req.query;
+  try {
+    if (!email) return res.status(401).json("Email is required.");
+    const user = await getUserByEmail(email as string);
+    if (!user) return res.status(404).json("User not found.");
+    const userObject = { email: user.email, fullName: user.full_name };
+    res.json(userObject);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json("Error when fetching user.");
+  }
+});
+
 // verify token that sent to request header
 export const verifyToken = (
   req: Request,
