@@ -18,6 +18,23 @@ interface ILogin {
 const router = Router();
 const JWT_SECRET: Secret = process.env.JWT_SECRET ?? "secret";
 
+// verify token that sent to request header
+export const verifyToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.headers.authorization;
+  if (token) {
+    jwt.verify(token, JWT_SECRET, (err) => {
+      if (err) return res.sendStatus(403);
+      next();
+    });
+    return;
+  }
+  res.sendStatus(401);
+};
+
 async function getUserByEmail(email: string) {
   if (!email) throw "Missing argument";
   try {
@@ -80,7 +97,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/user", async (req, res) => {
+router.get("/user", verifyToken, async (req, res) => {
   const { email } = req.query;
   try {
     if (!email) return res.status(401).json("Email is required.");
@@ -93,22 +110,5 @@ router.get("/user", async (req, res) => {
     return res.status(500).json("Error when fetching user.");
   }
 });
-
-// verify token that sent to request header
-export const verifyToken = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const token = req.headers.authorization;
-  if (token) {
-    jwt.verify(token, JWT_SECRET, (err) => {
-      if (err) return res.sendStatus(403);
-      next();
-    });
-    return;
-  }
-  res.sendStatus(401);
-};
 
 export { router as authRouter };
