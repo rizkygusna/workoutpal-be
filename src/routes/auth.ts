@@ -39,7 +39,7 @@ async function getUserByEmail(email: string) {
   if (!email) throw "Missing argument";
   try {
     const response = await client.execute({
-      sql: "SELECT * FROM users WHERE email = ?",
+      sql: "SELECT * FROM user WHERE email = ?",
       args: [email],
     });
     if (response.rows.length <= 0) return null;
