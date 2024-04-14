@@ -14,7 +14,7 @@ router.get("/", verifyToken, async (req, res) => {
     const result = await client.execute(
       `SELECT * FROM exercise_list WHERE user_id = '${userId}'`
     );
-    res.json(result.rows);
+    res.status(200).json(result.rows);
   } catch (error) {
     console.log(error);
     return res.status(500).json("Error fetching exercise list.");
@@ -32,7 +32,7 @@ router.post("/", verifyToken, async (req, res) => {
     if (result.rowsAffected <= 0)
       return res.status(404).json("Exercise list not found");
     // get the affected row id then return the row with id
-    res.json({ name: listName, description: description });
+    res.status(201).json({ name: listName, description: description });
   } catch (error) {
     console.log(error);
     return res.status(500).json("Error adding exercise list.");
@@ -51,10 +51,24 @@ router.put("/:listId", verifyToken, async (req, res) => {
     if (result.rowsAffected <= 0)
       return res.status(404).json("Exercise list not found");
     // get the affected row id then return the row with id
-    res.json({ name: listName, description: description });
+    res.status(200).json({ name: listName, description: description });
   } catch (error) {
     console.log(error);
     return res.status(500).json("Error edit exercise list.");
+  }
+});
+
+router.delete("/:listId", verifyToken, async (req, res) => {
+  const listId = req.params.listId;
+  try {
+    const result = await client.execute(
+      `DELETE FROM exercise_list WHERE list_id = ${listId}`
+    );
+    if (result.rowsAffected <= 0)
+      return res.status(404).json("Exercise list not found");
+    res.status(204).end();
+  } catch (error) {
+    return res.status(500).json("Error delete exercise list");
   }
 });
 
