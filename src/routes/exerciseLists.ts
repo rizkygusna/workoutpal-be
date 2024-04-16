@@ -4,8 +4,6 @@ import { verifyToken } from "./auth";
 
 const router = express.Router();
 
-// TODO: add get exercise list by id endpoint
-
 router.get("/", verifyToken, async (req, res) => {
   const { userId } = req.query;
   console.log("Received id: ", userId);
@@ -14,7 +12,35 @@ router.get("/", verifyToken, async (req, res) => {
     const result = await client.execute(
       `SELECT * FROM exercise_list WHERE user_id = '${userId}'`
     );
-    res.status(200).json(result.rows);
+    const rowsWithoutUserIdColumn = result.rows.map((row) => {
+      return {
+        id: row["list_id"],
+        name: row["list_name"],
+        description: row["description"],
+      };
+    });
+    res.status(200).json(rowsWithoutUserIdColumn);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json("Error fetching exercise list.");
+  }
+});
+
+router.get("/:listId", verifyToken, async (req, res) => {
+  const listId = req.params.listId;
+  try {
+    const result = await client.execute(
+      `SELECT * FROM exercise_list WHERE list_id = ${listId}`
+    );
+    if (result.rows.length <= 0) res.status(404).json("List not found");
+    const rowsWithoutUserIdColumn = result.rows.map((row) => {
+      return {
+        id: row["list_id"],
+        name: row["list_name"],
+        description: row["description"],
+      };
+    });
+    res.status(200).json(rowsWithoutUserIdColumn[0]);
   } catch (error) {
     console.log(error);
     return res.status(500).json("Error fetching exercise list.");
@@ -30,9 +56,12 @@ router.post("/", verifyToken, async (req, res) => {
       }')`
     );
     if (result.rowsAffected <= 0)
-      return res.status(404).json("Exercise list not found");
-    // get the affected row id then return the row with id
-    res.status(201).json({ name: listName, description: description });
+      res.status(500).json("Error adding exercise list.");
+    res.status(201).json({
+      id: result.lastInsertRowid,
+      name: listName,
+      description: description,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json("Error adding exercise list.");
@@ -50,8 +79,11 @@ router.put("/:listId", verifyToken, async (req, res) => {
     });
     if (result.rowsAffected <= 0)
       return res.status(404).json("Exercise list not found");
-    // get the affected row id then return the row with id
-    res.status(200).json({ name: listName, description: description });
+    res.status(200).json({
+      id: result.lastInsertRowid,
+      name: listName,
+      description: description,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json("Error edit exercise list.");
@@ -68,6 +100,7 @@ router.delete("/:listId", verifyToken, async (req, res) => {
       return res.status(404).json("Exercise list not found");
     res.status(204).end();
   } catch (error) {
+    console.log(error);
     return res.status(500).json("Error delete exercise list");
   }
 });
