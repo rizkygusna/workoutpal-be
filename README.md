@@ -1,7 +1,5 @@
 # Workoutpal Backend
 
----
-
 This is backend repo of workout log app made with express.js & typescript. Using turso libsql as database.
 
 ## How to run
