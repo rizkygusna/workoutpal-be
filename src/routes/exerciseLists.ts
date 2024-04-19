@@ -58,7 +58,7 @@ router.post("/", verifyToken, async (req, res) => {
     if (result.rowsAffected <= 0)
       res.status(500).json("Error adding exercise list.");
     res.status(201).json({
-      id: result.lastInsertRowid,
+      id: Number(result.lastInsertRowid),
       name: listName,
       description: description,
     });
@@ -80,7 +80,7 @@ router.put("/:listId", verifyToken, async (req, res) => {
     if (result.rowsAffected <= 0)
       return res.status(404).json("Exercise list not found");
     res.status(200).json({
-      id: result.lastInsertRowid,
+      id: Number(result.lastInsertRowid),
       name: listName,
       description: description,
     });
