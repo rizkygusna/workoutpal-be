@@ -105,4 +105,30 @@ router.delete("/:listId", verifyToken, async (req, res) => {
   }
 });
 
+router.get("/:listId/exercises", verifyToken, async (req, res) => {
+  const listId = req.params.listId;
+  try {
+    const result = await client.execute(
+      `SELECT e.exercise_id, e.exercise_name FROM exercise_list_exercise ele JOIN exercise e ON ele.exercise_id = e.exercise_id WHERE ele.list_id = ${listId}`
+    );
+    if (result.rows.length <= 0) res.status(200).json([]);
+    const rowsWithoutUserIdColumn = result.rows.map((row) => {
+      return {
+        id: row["exercise_id"],
+        name: row["exercise_name"],
+      };
+    });
+    res.status(200).json(rowsWithoutUserIdColumn);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json("Error fetching exercises.");
+  }
+});
+
+// add endpoint for add exercise to exercise list
+router.post("/:listId/exercises");
+
+// add endpoint for remove exercise from exercise list
+router.delete("/:listId/exercises/:exerciseId");
+
 export { router as exerciseListsRouter };
