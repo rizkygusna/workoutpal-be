@@ -125,10 +125,34 @@ router.get("/:listId/exercises", verifyToken, async (req, res) => {
   }
 });
 
-// add endpoint for add exercise to exercise list
-router.post("/:listId/exercises");
+router.post("/:listId/exercises", verifyToken, async (req, res) => {
+  const { exerciseIds } = req.body;
+  const listId = req.params.listId;
 
-// add endpoint for remove exercise from exercise list
+  if (!Array.isArray(exerciseIds) || exerciseIds.length <= 0) {
+    return res
+      .status(400)
+      .json({ message: "exerciseIds should be a non-empty array." });
+  }
+
+  const values = exerciseIds
+    .map((exerciseId) => `(${listId}, ${exerciseId})`)
+    .join(", ");
+
+  try {
+    const result = await client.execute(
+      `INSERT INTO exercise_list_exercise(list_id, exercise_id) VALUES ${values}`
+    );
+    if (result.rowsAffected <= 0)
+      res.status(500).json("Error adding exercise.");
+    res.status(201).json({ message: "Exercises added successfully." });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json("Error adding exercises.");
+  }
+});
+
+//TODO: add endpoint for remove exercise from exercise list
 router.delete("/:listId/exercises/:exerciseId");
 
 export { router as exerciseListsRouter };
