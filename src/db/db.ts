@@ -1,5 +1,5 @@
-import { createClient } from "@libsql/client";
-import "dotenv/config";
+import { createClient } from '@libsql/client';
+import 'dotenv/config';
 
 export const client = createClient({
   url: `${process.env.DATABASE_URL}`,
