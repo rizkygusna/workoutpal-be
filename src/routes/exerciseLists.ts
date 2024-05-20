@@ -136,7 +136,20 @@ router.post('/:listId/exercises', verifyToken, async (req, res) => {
   }
 });
 
-//TODO: add endpoint for remove exercise from exercise list
-router.delete('/:listId/exercises/:exerciseId');
+router.delete('/:listId/exercises/:exerciseId', verifyToken, async (req, res) => {
+  const listId = req.params.listId;
+  const exerciseId = req.params.exerciseId;
+
+  try {
+    const result = await client.execute(
+      `DELETE FROM exercise_list_exercise WHERE list_id = ${listId} AND exercise_id = ${exerciseId}`
+    );
+    if (result.rowsAffected <= 0) return res.status(404).json('Exercise not found');
+    res.status(204).end();
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json('Error delete exercise from exercise list');
+  }
+});
 
 export { router as exerciseListsRouter };
