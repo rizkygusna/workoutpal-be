@@ -4,7 +4,7 @@ import 'dotenv/config';
 import { authRouter } from './routes/auth';
 import { exerciseListsRouter } from './routes/exerciseLists';
 import { exercisesRouter } from './routes/exercises';
-import { client } from './db/db';
+import { exerciseSetsRouter } from './routes/exerciseSets';
 
 const app: Express = express();
 const port = process.env.PORT || 4000;
@@ -19,11 +19,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/auth', authRouter);
 app.use('/exerciseLists', exerciseListsRouter);
 app.use('/exercises', exercisesRouter);
+app.use('/sets', exerciseSetsRouter);
 
-app.use(async (req, res, next) => {
-  await client.sync();
-  next();
-});
+// app.use(async (req, res, next) => {
+//   await client.sync();
+//   next();
+// });
 
 app.listen(port, function () {
   console.log(`App listening on port ${port}!`);

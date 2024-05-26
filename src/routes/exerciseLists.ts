@@ -96,6 +96,8 @@ router.delete('/:listId', verifyToken, async (req, res) => {
   }
 });
 
+// MANAGE EXERCISES IN AN EXERCISE LIST
+
 router.get('/:listId/exercises', verifyToken, async (req, res) => {
   const listId = req.params.listId;
   try {
