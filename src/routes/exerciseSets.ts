@@ -48,5 +48,26 @@ router.get('/:setId', verifyToken, async (req, res) => {
   }
 });
 
-// TODO: create set endpoint
+router.post('/', verifyToken, async (req, res) => {
+  const { weight, repetition, listId, exerciseId } = req.body;
+  const dateCreated = new Date().toISOString();
+
+  try {
+    const result = await client.execute({
+      sql: 'INSERT INTO exercise_set (set_weight, set_repetition, set_date_created, list_id, exercise_id) VALUES (?, ?, ?, ?, ?)',
+      args: [weight, repetition, dateCreated, listId, exerciseId],
+    });
+    if (result.rowsAffected <= 0) res.status(500).json('Error adding exercise list.');
+    res.status(201).json({
+      id: Number(result.lastInsertRowid),
+      weight: weight,
+      repetition: repetition,
+      dateCreated: dateCreated,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+});
+
 export { router as exerciseSetsRouter };
