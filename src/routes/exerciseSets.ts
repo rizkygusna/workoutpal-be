@@ -70,4 +70,25 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
+router.put('/:setId', verifyToken, async (req, res) => {
+  const { setId } = req.params;
+  const { weight, repetition } = req.body;
+
+  try {
+    const result = await client.execute({
+      sql: 'UPDATE exercise_set SET set_weight = ?, set_repetition = ? WHERE set_id = ?',
+      args: [weight, repetition, setId],
+    });
+    if (result.rowsAffected <= 0) return res.status(404).json('Set not found');
+    res.status(200).json({
+      id: Number(setId),
+      weight: weight,
+      repetition: repetition,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json('Error edit set');
+  }
+});
+
 export { router as exerciseSetsRouter };

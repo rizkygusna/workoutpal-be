@@ -74,7 +74,7 @@ router.put('/:listId', verifyToken, async (req, res) => {
     });
     if (result.rowsAffected <= 0) return res.status(404).json('Exercise list not found');
     res.status(200).json({
-      id: Number(result.lastInsertRowid),
+      id: Number(listId),
       name: listName,
       description: description,
     });
