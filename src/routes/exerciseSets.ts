@@ -91,4 +91,17 @@ router.put('/:setId', verifyToken, async (req, res) => {
   }
 });
 
+router.delete('/:setId', verifyToken, async (req, res) => {
+  const { setId } = req.params;
+
+  try {
+    const result = await client.execute({ sql: 'DELETE FROM exercise_set WHERE set_id = ?', args: [setId] });
+    if (result.rowsAffected <= 0) return res.status(404).json('Exercise not found');
+    res.status(204).end();
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json('Error delete exercise from exercise list');
+  }
+});
+
 export { router as exerciseSetsRouter };
