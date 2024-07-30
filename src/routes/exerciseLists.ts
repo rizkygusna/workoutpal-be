@@ -104,14 +104,14 @@ router.get('/:listId/exercises', verifyToken, async (req, res) => {
     const result = await client.execute(
       `SELECT e.exercise_id, e.exercise_name FROM exercise_list_exercise ele JOIN exercise e ON ele.exercise_id = e.exercise_id WHERE ele.list_id = ${listId}`
     );
-    if (result.rows.length <= 0) res.status(200).json([]);
+    if (result.rows.length <= 0) return res.status(200).json([]);
     const rowsWithoutUserIdColumn = result.rows.map((row) => {
       return {
         id: row['exercise_id'],
         name: row['exercise_name'],
       };
     });
-    res.status(200).json(rowsWithoutUserIdColumn);
+    return res.status(200).json(rowsWithoutUserIdColumn);
   } catch (error) {
     console.log(error);
     return res.status(500).json('Error fetching exercises.');
