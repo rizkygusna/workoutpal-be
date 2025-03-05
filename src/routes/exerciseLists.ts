@@ -1,6 +1,7 @@
 import express from 'express';
 import { client } from '../db/db';
 import { verifyToken } from './auth';
+import { InStatement } from '@libsql/client/.';
 
 const router = express.Router();
 
@@ -117,23 +118,48 @@ router.get('/:listId/exercises', verifyToken, async (req, res) => {
   }
 });
 
-router.post('/:listId/exercises', verifyToken, async (req, res) => {
+router.put('/:listId/exercises', verifyToken, async (req, res) => {
   const { exerciseIds } = req.body;
-  const listId = req.params.listId;
+  const listId = parseInt(req.params.listId);
 
   if (!Array.isArray(exerciseIds) || exerciseIds.length <= 0) {
     return res.status(400).json({ message: 'exerciseIds should be a non-empty array.' });
   }
 
-  const values = exerciseIds.map((exerciseId) => `(${listId}, ${exerciseId})`).join(', ');
-
   try {
-    const result = await client.execute(`INSERT INTO exercise_list_exercise(list_id, exercise_id) VALUES ${values}`);
-    if (result.rowsAffected <= 0) res.status(500).json('Error adding exercise.');
-    res.status(201).json({ message: 'Exercises added successfully.' });
+    // delete existing relations
+    const statements: InStatement[] = [{ sql: 'DELETE FROM exercise_list_exercise WHERE list_id = ?', args: [listId] }];
+    // insert new relations
+    for (const exerciseId of exerciseIds) {
+      statements.push({
+        sql: 'INSERT INTO exercise_list_exercise(list_id, exercise_id) VALUES (?, ?)',
+        args: [listId, exerciseId],
+      });
+    }
+
+    await client.batch(statements, 'write');
+
+    return res.status(200).json({ message: 'Exercises added successfully.' });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json('Error adding exercises.');
+    console.error('Error updating exercises:', error);
+
+    let errorMessage = 'Error updating exercises.';
+    let statusCode = 500;
+
+    if (error instanceof Error) {
+      if (error.message.includes('FOREIGN KEY constraint failed')) {
+        errorMessage = 'One or more exercise IDs do not exist.';
+        statusCode = 400;
+      } else if (error.message.includes('UNIQUE constraint failed')) {
+        errorMessage = 'Duplicate exercise IDs were provided.';
+        statusCode = 400;
+      }
+
+      return res.status(statusCode).json({
+        message: errorMessage,
+        error: error.message,
+      });
+    }
   }
 });
 

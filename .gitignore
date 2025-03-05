@@ -4,3 +4,4 @@ src/**/*.js
 dist
 local.db
 .vscode
+dump.sql
