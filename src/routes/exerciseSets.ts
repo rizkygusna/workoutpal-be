@@ -20,7 +20,7 @@ router.get('/', verifyToken, async (req, res) => {
         dateCreated: row['set_date_created'],
       };
     });
-    res.status(200).json(transformedRows);
+    return res.status(200).json(transformedRows);
   } catch (error) {
     console.log(error);
     return res.status(500).json('Error fetching sets');
@@ -41,7 +41,7 @@ router.get('/:setId', verifyToken, async (req, res) => {
         dateCreated: row['set_date_created'],
       };
     });
-    res.status(200).json(transformedRows[0]);
+    return res.status(200).json(transformedRows[0]);
   } catch (error) {
     console.log(error);
     return res.status(500).json('Error fetching set');
@@ -58,7 +58,7 @@ router.post('/', verifyToken, async (req, res) => {
       args: [weight, repetition, dateCreated, listId, exerciseId],
     });
     if (result.rowsAffected <= 0) res.status(500).json('Error adding exercise list.');
-    res.status(201).json({
+    return res.status(201).json({
       id: Number(result.lastInsertRowid),
       weight: weight,
       repetition: repetition,
@@ -80,7 +80,7 @@ router.put('/:setId', verifyToken, async (req, res) => {
       args: [weight, repetition, setId],
     });
     if (result.rowsAffected <= 0) return res.status(404).json('Set not found');
-    res.status(200).json({
+    return res.status(200).json({
       id: Number(setId),
       weight: weight,
       repetition: repetition,
@@ -97,7 +97,7 @@ router.delete('/:setId', verifyToken, async (req, res) => {
   try {
     const result = await client.execute({ sql: 'DELETE FROM exercise_set WHERE set_id = ?', args: [setId] });
     if (result.rowsAffected <= 0) return res.status(404).json('Exercise not found');
-    res.status(204).end();
+    return res.status(204);
   } catch (error) {
     console.log(error);
     return res.status(500).json('Error delete exercise from exercise list');
