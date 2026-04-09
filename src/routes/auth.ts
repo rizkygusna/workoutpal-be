@@ -2,7 +2,7 @@ import { Router, Response, Request, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import jwt, { Secret } from 'jsonwebtoken';
 import 'dotenv/config';
-import { client } from '../db/db';
+import { client } from '../db/db.js';
 
 export interface IUser {
   email: string;
