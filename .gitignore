@@ -1,7 +1,9 @@
-.env
+.env*
+!.env*.example
 node_modules
 src/**/*.js
 dist
 local.db
 .vscode
 dump.sql
+.DS_Store
